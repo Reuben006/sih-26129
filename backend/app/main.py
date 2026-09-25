@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.document_verification import router as verification_router
+
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.seed import seed_database
@@ -16,22 +18,31 @@ from app.api.audit import router as audit_router
 from app.api.dashboard import router as dashboard_router
 from app.api.notifications import router as notifications_router
 from app.api.mock_departments import router as mock_departments_router
+from app.api.documents import router as documents_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize DB schemas and initial seed data
+    # Initialize DB schemas and seed data
     Base.metadata.create_all(bind=engine)
     seed_database()
     yield
 
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="GovConnect - Interoperability Middleware Layer for federated cross-department government service workflows (SIH 2026 PS 129).",
+    description="GovConnect - Interoperability Middleware Layer for federated cross-department government service workflows (SIH 2026 PS129).",
     lifespan=lifespan
 )
 
-# CORS configuration
+app.mount(
+    "/uploads",
+    StaticFiles(directory="uploads"),
+    name="uploads"
+)
+
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -40,7 +51,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global standardized exception handler
+
+# Global Exception Handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
@@ -53,7 +65,8 @@ async def global_exception_handler(request: Request, exc: Exception):
         }
     )
 
-# Register API routes under /api/v1
+
+# Register API Routes
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(applications_router, prefix=settings.API_V1_STR)
 app.include_router(departments_router, prefix=settings.API_V1_STR)
@@ -63,6 +76,8 @@ app.include_router(audit_router, prefix=settings.API_V1_STR)
 app.include_router(dashboard_router, prefix=settings.API_V1_STR)
 app.include_router(notifications_router, prefix=settings.API_V1_STR)
 app.include_router(mock_departments_router, prefix=settings.API_V1_STR)
+app.include_router(documents_router, prefix=settings.API_V1_STR)
+app.include_router(verification_router,prefix=settings.API_V1_STR)
 
 @app.get("/health", tags=["System Health"])
 def health_check():
@@ -72,6 +87,7 @@ def health_check():
         "version": settings.VERSION
     }
 
+
 @app.get("/", tags=["Root"])
 def root():
     return {
@@ -80,6 +96,13 @@ def root():
         "health": "/health"
     }
 
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
