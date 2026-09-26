@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import DocumentVerificationCard from "../components/DocumentVerificationCard";
 
-export default function DocumentVault() {
+  export default function DocumentVault({
+    currentUser
+  }) {
+    const canUpload = currentUser?.role === "CITIZEN";
   const [documents, setDocuments] = useState([]);
   const [file, setFile] = useState(null);
   const [documentType, setDocumentType] = useState("PAN");
@@ -25,20 +29,27 @@ export default function DocumentVault() {
 
     if (!file) return;
 
+    try{
     const formData = new FormData();
 
     formData.append("document_type", documentType);
     formData.append("user_id", userId);
     formData.append("file", file);
 
-    await axios.post(
-      "http://127.0.0.1:8000/api/v1/documents/upload",
-      formData
-    );
+      await axios.post(
+        "http://127.0.0.1:8000/api/v1/documents/upload",
+        formData
+      );
 
-    setFile(null);
+      alert("Document uploaded successfully");
 
-    loadDocuments();
+      setFile(null);
+
+      loadDocuments();
+    }catch(err){
+        console.error(err);
+        alert("Upload failed");
+    }
   };
 
   return (
@@ -47,7 +58,8 @@ export default function DocumentVault() {
         Document Vault
       </h1>
 
-      <div className="bg-white p-4 rounded shadow mb-6">
+      {canUpload && (
+        <div className="bg-white p-4 rounded shadow mb-6">
         <form onSubmit={handleUpload}>
           <div className="mb-4">
             <label className="block mb-2">
@@ -83,36 +95,30 @@ export default function DocumentVault() {
           </button>
         </form>
       </div>
+  )}
 
-      <div className="bg-white p-4 rounded shadow">
-        <h2 className="font-semibold mb-4">
-          Uploaded Documents
-        </h2>
+    <div className="bg-white p-4 rounded shadow">
+      <h2 className="font-semibold mb-4">
+        Uploaded Documents
+      </h2>
 
-        <table className="w-full">
-          <thead>
-            <tr>
-              <th className="text-left">Type</th>
-              <th className="text-left">File</th>
-              <th className="text-left">Uploaded</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {documents.map((doc) => (
-              <tr key={doc.id}>
-                <td>{doc.document_type}</td>
-                <td>{doc.file_name}</td>
-                <td>
-                  {new Date(
-                    doc.created_at
-                  ).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {documents.length === 0 ? (
+        <p className="text-sm text-slate-500">
+          No documents uploaded yet.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {documents.map((doc) => (
+            <DocumentVerificationCard
+              key={doc.id}
+              document={doc}
+              onRefresh={loadDocuments}
+              currentUser={currentUser}
+            />
+          ))}
+        </div>
+      )}
+    </div>
     </div>
   );
 }

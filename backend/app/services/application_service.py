@@ -1,6 +1,7 @@
 import random
 from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session
+from app.models.document import Document
 from datetime import datetime, timezone
 from app.models.application import Application, ApplicationDepartment, OverallStatus
 from app.models.workflow import Workflow
@@ -82,6 +83,16 @@ class ApplicationService:
         db.add(application)
         db.commit()
         db.refresh(application)
+
+        for doc_id in app_in.selected_documents:
+            doc = db.query(Document).filter(
+                Document.id == doc_id
+            ).first()
+
+            if doc:
+                doc.application_id = application.id
+
+        db.commit()
 
         # Step 4: Record Citizen Consent
         if app_in.grant_consent:

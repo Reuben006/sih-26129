@@ -28,13 +28,13 @@ export default function Sidebar({ currentView, setCurrentView, currentUser }) {
       id: 'new_application',
       label: 'New Single Window Application',
       icon: FilePlus2,
-      roles: ['CITIZEN', 'ADMIN']
+      roles: ['CITIZEN']
     },
     {
       id: 'documents',
       label: 'My Documents',
       icon: FileText,
-      roles: ['CITIZEN', 'ADMIN']
+      roles: ['CITIZEN']
     },
     {
       id: 'architecture',

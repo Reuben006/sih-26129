@@ -3,7 +3,12 @@ import { ShieldCheck, Sparkles, Building2, Send, AlertCircle, ArrowLeft, CheckCi
 import axios from 'axios';
 import { applicationService } from '../services/applicationService';
 
-export default function NewApplication({ onCancel, onSuccess }) {
+export default function NewApplication({
+  onCancel,
+  onSuccess,
+  currentUser
+}) {
+  console.log("currentUser =", currentUser);
   const [formData, setFormData] = useState({
     business_name: '',
     owner_name: '',
@@ -70,13 +75,23 @@ export default function NewApplication({ onCancel, onSuccess }) {
   };
 
   useEffect(() => {
-    loadDocuments();
-  }, []);
+    if (currentUser?.id) {
+        loadDocuments();
+      }
+    }, [currentUser]);
 
   const loadDocuments = async () => {
     try {
+       console.log(currentUser);
+      const token = localStorage.getItem("govconnect_token");
+
       const res = await axios.get(
-        'http://localhost:8000/api/v1/documents/1'
+         `http://localhost:8000/api/v1/documents/${currentUser.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          } 
+        }
       );
 
       setDocuments(res.data);
@@ -95,6 +110,10 @@ export default function NewApplication({ onCancel, onSuccess }) {
       const created = await applicationService.createApplication({
         ...formData,
         pan: formData.pan.trim().toUpperCase(),
+
+        selected_documents: [
+          Number(selectedDocs.pan_document)
+        ]
       });
       onSuccess(created.id);
     } catch (err) {

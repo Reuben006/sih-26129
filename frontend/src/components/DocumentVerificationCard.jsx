@@ -9,7 +9,8 @@ import {
 
 export default function DocumentVerificationCard({
   document,
-  onRefresh
+  onRefresh,
+  currentUser
 }) {
   const verifyDocument = async (status) => {
     try {
@@ -35,14 +36,14 @@ export default function DocumentVerificationCard({
 
   const getStatusBadge = () => {
     switch (document.verification_status) {
-      case 'VERIFIED':
+      case "VERIFIED":
         return (
           <span className="px-2 py-1 text-[10px] rounded-full bg-green-100 text-green-700 font-bold">
             VERIFIED
           </span>
         );
 
-      case 'REJECTED':
+      case "REJECTED":
         return (
           <span className="px-2 py-1 text-[10px] rounded-full bg-red-100 text-red-700 font-bold">
             REJECTED
@@ -57,6 +58,12 @@ export default function DocumentVerificationCard({
         );
     }
   };
+
+  const canVerify =
+    currentUser?.role === "OFFICIAL" ||
+    currentUser?.role === "ADMIN";
+
+    console.log(document);
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
@@ -88,30 +95,52 @@ export default function DocumentVerificationCard({
           View Document
         </a>
 
-        {document.verification_status !== 'VERIFIED' && (
+       {canVerify && document.verification_status === "PENDING" && (
+        <>
           <button
-            onClick={() => verifyDocument('VERIFIED')}
+            onClick={() => verifyDocument("VERIFIED")}
             className="px-3 py-2 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-1"
           >
             <CheckCircle2 className="w-3 h-3" />
             Verify
           </button>
-        )}
 
-        {document.verification_status !== 'REJECTED' && (
           <button
-            onClick={() => verifyDocument('REJECTED')}
+            onClick={() => verifyDocument("REJECTED")}
             className="px-3 py-2 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-1"
           >
             <XCircle className="w-3 h-3" />
             Reject
           </button>
-        )}
+        </>
+      )}
       </div>
 
-      <div className="mt-3 flex items-center gap-1 text-[11px] text-slate-500">
-        <Clock3 className="w-3 h-3" />
-        Status tracked through middleware verification layer
+      <div className="mt-3 text-[11px] text-slate-500 space-y-1">
+        <div className="flex items-center gap-1">
+          <Clock3 className="w-3 h-3" />
+          Status tracked through middleware verification layer
+        </div>
+
+        {document.verified_by && (
+          <p>
+            <strong>Verified By:</strong> Officer #{document.verified_by}
+          </p>
+        )}
+
+        {document.verified_at && (
+          <p>
+            <strong>Verified At:</strong>{" "}
+            {new Date(document.verified_at).toLocaleString()}
+          </p>
+        )}
+
+        {document.verification_remarks && (
+          <p>
+            <strong>Remarks:</strong>{" "}
+            {document.verification_remarks}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -45,6 +45,10 @@ class Application(Base):
     # Relationships
     user = relationship("User", back_populates="applications")
     workflow = relationship("Workflow", back_populates="applications")
+    documents = relationship(
+        "Document",
+        back_populates="application"
+    )
     department_statuses = relationship("ApplicationDepartment", back_populates="application", cascade="all, delete-orphan", order_by="ApplicationDepartment.id")
     consents = relationship("Consent", back_populates="application", cascade="all, delete-orphan")
     audit_logs = relationship("AuditLog", back_populates="application", cascade="all, delete-orphan")
