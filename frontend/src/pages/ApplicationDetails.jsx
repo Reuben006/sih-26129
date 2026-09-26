@@ -1,4 +1,6 @@
+import axios from 'axios';
 import React, { useState, useEffect } from 'react';
+import DocumentVerificationCard from '../components/DocumentVerificationCard';
 import {
   ArrowLeft,
   Building2,
@@ -23,6 +25,7 @@ export default function ApplicationDetails({ applicationId, onBack, currentUser 
   const [app, setApp] = useState(null);
   const [workflow, setWorkflow] = useState(null);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
@@ -45,8 +48,21 @@ export default function ApplicationDetails({ applicationId, onBack, currentUser 
     }
   };
 
+  const loadDocuments = async () => {
+    try {
+      const res = await axios.get(
+        'http://localhost:8000/api/v1/documents/1'
+      );
+
+      setDocuments(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    loadDocuments();
   }, [applicationId]);
 
   const handleDepartmentAction = async (departmentId, status, remarks) => {
@@ -229,6 +245,28 @@ export default function ApplicationDetails({ applicationId, onBack, currentUser 
           <History className="w-4 h-4" />
           <span>Immutable Audit Trail ({auditLogs.length})</span>
         </button>
+      </div>
+
+     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <h3 className="text-sm font-bold text-slate-800 mb-4">
+          Attached Documents
+        </h3>
+
+        {documents.length === 0 ? (
+          <p className="text-xs text-slate-500">
+            No documents uploaded.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {documents.map((doc) => (
+              <DocumentVerificationCard
+                key={doc.id}
+                document={doc}
+                onRefresh={loadDocuments}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Tab Content */}

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Sparkles, Building2, Send, AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import axios from 'axios';
 import { applicationService } from '../services/applicationService';
 
 export default function NewApplication({ onCancel, onSuccess }) {
@@ -18,6 +19,14 @@ export default function NewApplication({ onCancel, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
+
+  const [documents, setDocuments] = useState([]);
+
+  const [selectedDocs, setSelectedDocs] = useState({
+    pan_document: '',
+    aadhaar_document: '',
+    license_document: ''
+  });
 
   // Auto-fill demo values requested in SIH prompt
   const handlePrefillDemo = () => {
@@ -58,6 +67,22 @@ export default function NewApplication({ onCancel, onSuccess }) {
 
     setValidationErrors(errs);
     return Object.keys(errs).length === 0;
+  };
+
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  const loadDocuments = async () => {
+    try {
+      const res = await axios.get(
+        'http://localhost:8000/api/v1/documents/1'
+      );
+
+      setDocuments(res.data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -130,6 +155,39 @@ export default function NewApplication({ onCancel, onSuccess }) {
             <Building2 className="w-4 h-4 text-govblue-600" />
             <span>Common Establishment & Applicant KYC</span>
           </h2>
+
+          <div className="mb-6 space-y-4">
+            <h3 className="text-sm font-semibold text-slate-700">
+              Attached Documents
+            </h3>
+
+            <div>
+              <label className="block text-xs font-semibold mb-1">
+                PAN Document
+              </label>
+
+              <select
+                value={selectedDocs.pan_document}
+                onChange={(e) =>
+                  setSelectedDocs({
+                    ...selectedDocs,
+                    pan_document: e.target.value
+                  })
+                }
+                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl"
+              >
+                <option value="">Select PAN</option>
+
+                {documents
+                  .filter((d) => d.document_type.toLowerCase() === "pan")
+                  .map((doc) => (
+                    <option key={doc.id} value={doc.id}>
+                      {doc.file_name}
+                    </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

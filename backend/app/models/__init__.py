@@ -5,6 +5,8 @@ from app.models.application import Application, ApplicationDepartment, OverallSt
 from app.models.consent import Consent, ConsentStatus
 from app.models.audit import AuditLog
 from app.models.notification import Notification
+from app.models.document import Document
+from app.models.document_verification import DocumentVerification
 
 __all__ = [
     "User",

@@ -2,12 +2,11 @@ import React from 'react';
 import {
   LayoutDashboard,
   FilePlus2,
-  GitBranch,
+  FileText,
   ShieldCheck,
   History,
   Activity,
-  Layers,
-  Settings
+  Layers
 } from 'lucide-react';
 
 export default function Sidebar({ currentView, setCurrentView, currentUser }) {
@@ -16,7 +15,12 @@ export default function Sidebar({ currentView, setCurrentView, currentUser }) {
   const navItems = [
     {
       id: 'dashboard',
-      label: role === 'CITIZEN' ? 'My Applications' : role === 'OFFICIAL' ? 'Verification Queue' : 'Admin Operations',
+      label:
+        role === 'CITIZEN'
+          ? 'My Applications'
+          : role === 'OFFICIAL'
+          ? 'Verification Queue'
+          : 'Admin Operations',
       icon: LayoutDashboard,
       roles: ['CITIZEN', 'OFFICIAL', 'ADMIN']
     },
@@ -24,6 +28,12 @@ export default function Sidebar({ currentView, setCurrentView, currentUser }) {
       id: 'new_application',
       label: 'New Single Window Application',
       icon: FilePlus2,
+      roles: ['CITIZEN', 'ADMIN']
+    },
+    {
+      id: 'documents',
+      label: 'My Documents',
+      icon: FileText,
       roles: ['CITIZEN', 'ADMIN']
     },
     {
@@ -46,7 +56,9 @@ export default function Sidebar({ currentView, setCurrentView, currentUser }) {
     }
   ];
 
-  const filteredItems = navItems.filter(item => item.roles.includes(role));
+  const filteredItems = navItems.filter((item) =>
+    item.roles.includes(role)
+  );
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200 min-h-[calc(100vh-4rem)] flex flex-col justify-between p-4 shadow-sm">
@@ -54,9 +66,11 @@ export default function Sidebar({ currentView, setCurrentView, currentUser }) {
         <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
           Navigation
         </div>
+
         {filteredItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentView === item.id;
+
           return (
             <button
               key={item.id}
@@ -67,21 +81,28 @@ export default function Sidebar({ currentView, setCurrentView, currentUser }) {
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-govsaffron-500' : 'text-slate-500'}`} />
+              <Icon
+                className={`w-4 h-4 ${
+                  isActive
+                    ? 'text-govsaffron-500'
+                    : 'text-slate-500'
+                }`}
+              />
               <span>{item.label}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Compliance / Interoperability Notice Card */}
       <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1.5">
         <div className="flex items-center gap-1.5 font-semibold text-slate-800">
           <ShieldCheck className="w-4 h-4 text-govgreen-600" />
           <span>Interoperability Guarantee</span>
         </div>
+
         <p className="text-[11px] text-slate-500 leading-normal">
-          Connected to simulated independent gateways without database unification or legacy system replacement.
+          Connected to simulated independent gateways without
+          database unification or legacy system replacement.
         </p>
       </div>
     </aside>
