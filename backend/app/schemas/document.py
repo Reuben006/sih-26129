@@ -5,6 +5,8 @@ from typing import Optional
 
 class DocumentOut(BaseModel):
     id: int
+    application_id: int | None = None
+
     document_type: str
     file_name: str
     file_path: str

@@ -11,6 +11,12 @@ class Document(Base):
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
+    application_id = Column(
+        Integer,
+        ForeignKey("applications.id"),
+        nullable=True
+    )
+
     document_type = Column(String(50), nullable=False)
     file_name = Column(String(255), nullable=False)
     file_path = Column(String(500), nullable=False)
@@ -41,3 +47,9 @@ class Document(Base):
     )
 
     user = relationship("User")
+
+
+    application = relationship(
+        "Application",
+        back_populates="documents"
+    )

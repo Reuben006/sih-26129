@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.user import User, UserRole
+from app.models.document import Document
+from app.schemas.document import DocumentOut
 from app.models.application import Application, ApplicationDepartment, DepartmentStatus
 from app.schemas.application import (
     ApplicationCreate,
@@ -104,3 +106,16 @@ async def update_department_status(
         "message": message,
         "details": extra
     }
+
+@router.get(
+    "/{app_id}/documents",
+    response_model=list[DocumentOut]
+)
+def get_application_documents(
+    app_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return db.query(Document).filter(
+        Document.application_id == app_id
+    ).all()

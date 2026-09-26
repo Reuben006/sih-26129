@@ -34,6 +34,8 @@ class ApplicationCreate(CanonicalApplicationPayload):
     workflow_code: Optional[str] = "RESTAURANT_APPROVAL"
     grant_consent: bool = True
 
+    selected_documents: list[int] = []
+
 class ApplicationDepartmentOut(BaseModel):
     id: int
     application_id: int

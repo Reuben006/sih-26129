@@ -50,8 +50,15 @@ export default function ApplicationDetails({ applicationId, onBack, currentUser 
 
   const loadDocuments = async () => {
     try {
+      const token = localStorage.getItem("govconnect_token");
+
       const res = await axios.get(
-        'http://localhost:8000/api/v1/documents/1'
+        `http://localhost:8000/api/v1/applications/${applicationId}/documents`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       setDocuments(res.data);
@@ -61,8 +68,29 @@ export default function ApplicationDetails({ applicationId, onBack, currentUser 
   };
 
   useEffect(() => {
-    fetchData();
-    loadDocuments();
+    const loadPage = async () => {
+      try {
+        const appData = await applicationService.getApplication(applicationId);
+
+        setApp(appData);
+
+        await loadDocuments(appData.user_id);
+
+        const [wfData, auditData] = await Promise.all([
+          applicationService.getApplicationWorkflow(applicationId),
+          applicationService.getApplicationAudit(applicationId),
+        ]);
+
+        setWorkflow(wfData);
+        setAuditLogs(auditData);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPage();
   }, [applicationId]);
 
   const handleDepartmentAction = async (departmentId, status, remarks) => {
@@ -259,11 +287,12 @@ export default function ApplicationDetails({ applicationId, onBack, currentUser 
         ) : (
           <div className="space-y-3">
             {documents.map((doc) => (
-              <DocumentVerificationCard
+             <DocumentVerificationCard
                 key={doc.id}
                 document={doc}
                 onRefresh={loadDocuments}
-              />
+                currentUser={currentUser}
+            />
             ))}
           </div>
         )}

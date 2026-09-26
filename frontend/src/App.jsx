@@ -120,6 +120,7 @@ export default function App() {
                 setSelectedAppId(id);
                 setCurrentView('application_details');
               }}
+              currentUser={currentUser}
             />
           )}
 
@@ -139,7 +140,9 @@ export default function App() {
           )}
 
           {currentView === 'documents' && (
-            <DocumentVault />
+            <DocumentVault
+              currentUser={currentUser}
+            />
           )}
 
           {currentView === 'official_queue' && (
