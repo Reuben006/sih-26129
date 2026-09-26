@@ -76,7 +76,7 @@ export default function OfficialDashboard({ onSelectApplication }) {
 
         <div className="flex items-center gap-3">
           <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
-            {['ALL', 'MUNICIPALITY', 'FSSAI', 'FIRE'].map((dept) => (
+            {['ALL', 'MUNICIPALITY', 'FSSAI', 'FIRE' , 'GST' , 'SHOPS'].map((dept) => (
               <button
                 key={dept}
                 onClick={() => setSelectedDeptFilter(dept)}

@@ -70,6 +70,19 @@ def seed_database():
                 "connector_type": "NOC_REST",
                 "description": "Life safety, fire mitigation, building occupancy clearance and NOC",
                 "active": True
+            },{
+                "name": "GST & Tax Department",
+                "code": "GST",
+                "connector_type": "GSTN_REST",
+                "description": "Business tax registration and GST compliance verification",
+                "active": True
+            },
+            {
+                "name": "Shops & Establishments Department",
+                "code": "SHOPS",
+                "connector_type": "LABOUR_REST",
+                "description": "Establishment registration and labour compliance",
+                "active": True
             }
         ]
 
@@ -92,7 +105,7 @@ def seed_database():
             wf = Workflow(
                 name="Restaurant Establishment Unified Clearance",
                 code="RESTAURANT_APPROVAL",
-                description="Sequential federated approval workflow: Municipality -> FSSAI -> Fire Department -> Final Clearance",
+                description="Sequential federated approval workflow: Municipality -> FSSAI -> Fire -> GST -> Shops & Establishments -> Final Clearance",
                 active=True
             )
             db.add(wf)
@@ -102,12 +115,17 @@ def seed_database():
             muni = db.query(Department).filter(Department.code == "MUNICIPALITY").first()
             fssai = db.query(Department).filter(Department.code == "FSSAI").first()
             fire = db.query(Department).filter(Department.code == "FIRE").first()
+            gst = db.query(Department).filter(Department.code == "GST").first()
+            shops = db.query(Department).filter(Department.code == "SHOPS").first()
 
             if muni and fssai and fire:
                 s1 = WorkflowStep(workflow_id=wf.id, department_id=muni.id, step_order=1, required=True)
                 s2 = WorkflowStep(workflow_id=wf.id, department_id=fssai.id, step_order=2, required=True)
                 s3 = WorkflowStep(workflow_id=wf.id, department_id=fire.id, step_order=3, required=True)
-                db.add_all([s1, s2, s3])
+                s4 = WorkflowStep(workflow_id=wf.id, department_id=gst.id, step_order=4, required=True)
+                s5 = WorkflowStep(workflow_id=wf.id, department_id=shops.id, step_order=5, required=True)
+
+                db.add_all([s1, s2, s3, s4, s5])
 
             db.commit()
 

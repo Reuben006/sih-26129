@@ -46,7 +46,8 @@ async def test_full_demo_flow():
     success, app1, msg = await ApplicationService.create_application(db, app_data, citizen)
     assert success, f"Application creation failed: {msg}"
     print(f"\n[Step 3 & 4] Validated data and created Unified Application Number: {app1.application_number}")
-    print(f"[Step 5] Workflow Engine activated: Municipality -> FSSAI -> Fire")
+    print(f"[Step 5] Workflow Engine activated: Municipality -> FSSAI -> Fire -> GST -> Shops & Establishments")
+
 
     db.refresh(app1)
     muni_status = next(s for s in app1.department_statuses if s.department.code == "MUNICIPALITY")
@@ -117,7 +118,8 @@ async def test_full_demo_flow():
     for n in notifs[:3]:
         print(f"  - [{n.type}] {n.title}: {n.message}")
 
-    # DEMO PART B: Now demonstrate application where all three APPROVE -> Final APPROVED
+    # DEMO PART B: All five departments approve -> Final APPROVED
+
     print("\n-----------------------------------------------------------")
     print("DEMO PART B: Full End-to-End Approval (All Departments Pass)")
     print("-----------------------------------------------------------")
@@ -156,6 +158,38 @@ async def test_full_demo_flow():
         db=db, application_id=app2.id, department_id=fire2.department_id,
         decision_status=DepartmentStatus.APPROVED, remarks="Fire NOC Approved"
     )
+    db.refresh(app2)
+
+    # Approve GST
+    gst2 = next(
+        s for s in app2.department_statuses
+        if s.department.code == "GST"
+    )
+
+    await WorkflowEngine.process_department_decision(
+        db=db,
+        application_id=app2.id,
+        department_id=gst2.department_id,
+        decision_status=DepartmentStatus.APPROVED,
+        remarks="GST Registration Approved"
+    )
+
+    db.refresh(app2)
+
+    # Approve Shops & Establishments
+    shops2 = next(
+        s for s in app2.department_statuses
+        if s.department.code == "SHOPS"
+    )
+
+    await WorkflowEngine.process_department_decision(
+        db=db,
+        application_id=app2.id,
+        department_id=shops2.department_id,
+        decision_status=DepartmentStatus.APPROVED,
+        remarks="Shops & Establishment Registration Approved"
+    )
+
     db.refresh(app2)
 
     print(f"\nFinal Application {app2.application_number} Overall Status: {app2.overall_status.value}")

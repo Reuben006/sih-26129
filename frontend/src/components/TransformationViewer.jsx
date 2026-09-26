@@ -48,7 +48,28 @@ export default function TransformationViewer({ canonicalData, departmentStatuses
         { from: 'mobile', to: 'owner_phone', note: 'Emergency primary contact' },
         { from: 'building_area_sqft', to: 'total_area_sqft', note: 'Evacuation radius calculation' },
       ]
-    }
+    },
+    GST: {
+    title: 'GST Registration Portal Schema',
+    spec: 'GSTN Tax Registration & Compliance Format',
+    mapping: [
+      { from: 'business_name', to: 'trade_name', note: 'Registered GST business name' },
+      { from: 'owner_name', to: 'taxpayer_name', note: 'Primary GST taxpayer' },
+      { from: 'address', to: 'principal_place_of_business', note: 'GST business location' },
+      { from: 'pan', to: 'pan_number', note: 'PAN linked GST registration' },
+      { from: 'mobile', to: 'authorized_contact', note: 'GST communication channel' },
+    ]
+  },SHOPS: {
+    title: 'Shops & Establishments Registration Schema',
+    spec: 'Labour Department Establishment Registration Format',
+    mapping: [
+      { from: 'business_name', to: 'establishment_name', note: 'Registered establishment name' },
+      { from: 'owner_name', to: 'employer_name', note: 'Employer / proprietor details' },
+      { from: 'address', to: 'establishment_address', note: 'Workplace address' },
+      { from: 'mobile', to: 'contact_number', note: 'Labour department contact' },
+      { from: 'seating_capacity', to: 'employee_capacity', note: 'Approx establishment workforce capacity' },
+    ]
+  },
   };
 
   const currentInfo = schemaInfo[selectedDeptCode] || schemaInfo.MUNICIPALITY;
@@ -69,7 +90,7 @@ export default function TransformationViewer({ canonicalData, departmentStatuses
 
         {/* Department Switcher Tabs */}
         <div className="flex items-center bg-slate-800 p-1 rounded-lg border border-slate-700">
-          {['MUNICIPALITY', 'FSSAI', 'FIRE'].map((code) => (
+          {['MUNICIPALITY', 'FSSAI', 'FIRE', 'GST', 'SHOPS'].map((code) => (
             <button
               key={code}
               onClick={() => setSelectedDeptCode(code)}

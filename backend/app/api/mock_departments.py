@@ -10,12 +10,16 @@ router = APIRouter(prefix="/mock", tags=["Mock Department External APIs"])
 MUNICIPALITY_DB: Dict[str, Dict[str, Any]] = {}
 FSSAI_DB: Dict[str, Dict[str, Any]] = {}
 FIRE_DB: Dict[str, Dict[str, Any]] = {}
+GST_DB: Dict[str, Dict[str, Any]] = {}
+SHOPS_DB: Dict[str, Dict[str, Any]] = {}
 
 # Simulation toggles to demonstrate system resilience and error handling
 SIMULATION_FLAGS = {
     "municipality_fail": False,
     "fssai_fail": False,
-    "fire_fail": False
+    "fire_fail": False,
+    "gst_fail": False,
+    "shops_fail": False
 }
 
 class ExternalActionPayload(BaseModel):
@@ -209,6 +213,93 @@ async def fire_action(external_id: str, action_data: ExternalActionPayload):
         "status": new_status,
         "message": f"Fire Safety NOC status updated to {new_status}"
     }
+# --- MOCK GST SYSTEM ---
+
+@router.post("/gst/registrations", status_code=status.HTTP_201_CREATED)
+async def gst_submit(payload: Dict[str, Any]):
+    if SIMULATION_FLAGS["gst_fail"]:
+        raise HTTPException(
+            status_code=503,
+            detail="GSTN Gateway Down"
+        )
+
+    external_id = f"GST-{random.randint(10000,99999)}"
+
+    GST_DB[external_id] = {
+        "external_id": external_id,
+        "payload": payload,
+        "status": "GST_PENDING",
+        "submitted_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    return {
+        "success": True,
+        "external_id": external_id,
+        "department_code": "GST"
+    }
+
+
+@router.get("/gst/registrations/{external_id}")
+async def gst_get_status(external_id: str):
+    return GST_DB[external_id]
+
+
+@router.post("/gst/registrations/{external_id}/action")
+async def gst_action(
+    external_id: str,
+    action_data: ExternalActionPayload
+):
+    GST_DB[external_id]["status"] = (
+        "APPROVED"
+        if action_data.action.upper() == "APPROVE"
+        else "REJECTED"
+    )
+
+    return GST_DB[external_id]
+
+# --- MOCK SHOPS & ESTABLISHMENTS SYSTEM ---
+
+@router.post("/shops/registrations", status_code=status.HTTP_201_CREATED)
+async def shops_submit(payload: Dict[str, Any]):
+    if SIMULATION_FLAGS["shops_fail"]:
+        raise HTTPException(
+            status_code=503,
+            detail="Shops Gateway Down"
+        )
+
+    external_id = f"SHOPS-{random.randint(10000,99999)}"
+
+    SHOPS_DB[external_id] = {
+        "external_id": external_id,
+        "payload": payload,
+        "status": "SHOPS_PENDING",
+        "submitted_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    return {
+        "success": True,
+        "external_id": external_id,
+        "department_code": "SHOPS"
+    }
+
+
+@router.get("/shops/registrations/{external_id}")
+async def shops_get_status(external_id: str):
+    return SHOPS_DB[external_id]
+
+
+@router.post("/shops/registrations/{external_id}/action")
+async def shops_action(
+    external_id: str,
+    action_data: ExternalActionPayload
+):
+    SHOPS_DB[external_id]["status"] = (
+        "APPROVED"
+        if action_data.action.upper() == "APPROVE"
+        else "REJECTED"
+    )
+
+    return SHOPS_DB[external_id]
 
 # --- RESILIENCE & FAILURE SIMULATION TOGGLES (FOR JUDGES DEMO) ---
 
@@ -223,7 +314,7 @@ async def toggle_failure(payload: FailureTogglePayload):
             "simulated_failure_active": payload.simulate_fail,
             "message": f"Simulated failure for {dep.upper()} is now {'ENABLED (Down)' if payload.simulate_fail else 'DISABLED (Healthy)'}"
         }
-    raise HTTPException(status_code=400, detail="Invalid department name. Use: municipality, fssai, fire")
+    raise HTTPException(status_code=400, detail="Invalid department name. Use: municipality, fssai, fire , gst, shops")
 
 @router.get("/simulate-failure/status")
 async def get_failure_statuses():
@@ -231,5 +322,7 @@ async def get_failure_statuses():
         "simulation_flags": SIMULATION_FLAGS,
         "municipality_records": len(MUNICIPALITY_DB),
         "fssai_records": len(FSSAI_DB),
-        "fire_records": len(FIRE_DB)
+        "fire_records": len(FIRE_DB),
+        "gst_records": len(GST_DB),
+        "shops_records": len(SHOPS_DB)
     }
