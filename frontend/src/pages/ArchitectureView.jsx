@@ -100,9 +100,10 @@ export default function ArchitectureView() {
                   <GitBranch className="w-4 h-4" />
                   <span>Workflow State Machine</span>
                 </div>
-                <p className="text-[11px] text-slate-300 leading-relaxed">
-                  Configurable step orchestration: Municipality → FSSAI → Fire Services.
-                </p>
+               <p className="text-[11px] text-slate-300 leading-relaxed">
+                  Configurable step orchestration:
+                  Municipality → FSSAI → Fire → GST → Shops & Establishments.
+              </p>
               </div>
 
               <div className="p-4 rounded-xl bg-govblue-900/80 border border-blue-700/60 space-y-2">
@@ -131,25 +132,29 @@ export default function ArchitectureView() {
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-3">
                 Proprietary Adapters & Transformation Connectors
               </span>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+
                 <div className="p-3 bg-slate-900/90 rounded-lg border border-blue-600/40 text-xs font-mono text-center">
                   <span className="text-emerald-400 font-bold">MunicipalityConnector</span>
-                  <p className="text-[10px] text-slate-400 font-sans mt-0.5">
-                    Transforms to enterpriseName, proprietor
-                  </p>
                 </div>
+
                 <div className="p-3 bg-slate-900/90 rounded-lg border border-blue-600/40 text-xs font-mono text-center">
                   <span className="text-blue-400 font-bold">FSSAIConnector</span>
-                  <p className="text-[10px] text-slate-400 font-sans mt-0.5">
-                    Transforms to firm_name, applicant
-                  </p>
                 </div>
+
                 <div className="p-3 bg-slate-900/90 rounded-lg border border-blue-600/40 text-xs font-mono text-center">
                   <span className="text-rose-400 font-bold">FireConnector</span>
-                  <p className="text-[10px] text-slate-400 font-sans mt-0.5">
-                    Transforms to establishment, owner
-                  </p>
                 </div>
+
+                <div className="p-3 bg-slate-900/90 rounded-lg border border-blue-600/40 text-xs font-mono text-center">
+                  <span className="text-amber-400 font-bold">GSTConnector</span>
+                </div>
+
+                <div className="p-3 bg-slate-900/90 rounded-lg border border-blue-600/40 text-xs font-mono text-center">
+                  <span className="text-cyan-400 font-bold">ShopsConnector</span>
+                </div>
+
               </div>
             </div>
           </div>
@@ -165,7 +170,7 @@ export default function ArchitectureView() {
                 Layer 3: Existing Independent Department Portals & Legacy Registries (Untouched)
               </span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div className="p-5 rounded-2xl bg-slate-50 border border-slate-300 text-center space-y-1.5 shadow-sm">
                 <Server className="w-6 h-6 text-slate-700 mx-auto" />
                 <h4 className="font-bold text-xs text-slate-900">Municipal Trade License Portal</h4>
@@ -192,6 +197,30 @@ export default function ArchitectureView() {
                   State Emergency Services API
                 </span>
               </div>
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-300 text-center space-y-1.5 shadow-sm">
+                <Server className="w-6 h-6 text-slate-700 mx-auto" />
+                <h4 className="font-bold text-xs text-slate-900">
+                  GST Registration Portal
+                </h4>
+                <p className="text-[10px] text-slate-500 font-mono">
+                  /mock/gst/registrations
+                </p>
+                <span className="inline-block px-2 py-0.5 bg-slate-200 text-slate-700 rounded text-[10px]">
+                  GSTN API Gateway
+                </span>
+              </div>
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-300 text-center space-y-1.5 shadow-sm">
+              <Server className="w-6 h-6 text-slate-700 mx-auto" />
+              <h4 className="font-bold text-xs text-slate-900">
+                Shops & Establishments Registry
+              </h4>
+              <p className="text-[10px] text-slate-500 font-mono">
+                /mock/shops/registrations
+              </p>
+              <span className="inline-block px-2 py-0.5 bg-slate-200 text-slate-700 rounded text-[10px]">
+                Labour Department Portal
+              </span>
+            </div>
             </div>
           </div>
         </div>

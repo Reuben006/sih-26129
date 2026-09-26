@@ -1,20 +1,37 @@
 import React from 'react';
-import { CheckCircle2, Clock, XCircle, AlertCircle, Building2, UtensilsCrossed, Flame, Award } from 'lucide-react';
+import {
+  Building2,
+  UtensilsCrossed,
+  Flame,
+  Receipt,
+  Store,
+  Award
+} from 'lucide-react';
+
 import StatusBadge from './StatusBadge';
 
 export default function WorkflowTimeline({ steps, overallStatus, currentStepOrder }) {
-  const getDeptIcon = (code) => {
-    switch (code) {
-      case 'MUNICIPALITY':
-        return Building2;
-      case 'FSSAI':
-        return UtensilsCrossed;
-      case 'FIRE':
-        return Flame;
-      default:
-        return Building2;
-    }
-  };
+const getDeptIcon = (code) => {
+  switch (code) {
+    case 'MUNICIPALITY':
+      return Building2;
+
+    case 'FSSAI':
+      return UtensilsCrossed;
+
+    case 'FIRE':
+      return Flame;
+
+    case 'GST':
+      return Receipt;
+
+    case 'SHOPS':
+      return Store;
+
+    default:
+      return Building2;
+  }
+};
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
@@ -35,7 +52,7 @@ export default function WorkflowTimeline({ steps, overallStatus, currentStepOrde
         {/* Horizontal Connector Line (desktop) */}
         <div className="hidden md:block absolute top-1/2 left-8 right-8 h-0.5 bg-slate-200 -translate-y-6 z-0" />
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 relative z-10">
           {steps.map((step, idx) => {
             const Icon = getDeptIcon(step.department_code);
             const isApproved = step.status === 'APPROVED';
@@ -117,7 +134,7 @@ export default function WorkflowTimeline({ steps, overallStatus, currentStepOrde
             );
           })}
 
-          {/* Stage 4: Final Outcome Node */}
+          {/* Stage 6: Final Outcome Node */}
           <div
             className={`p-4 rounded-xl border transition-all ${
               overallStatus === 'APPROVED'
@@ -129,7 +146,7 @@ export default function WorkflowTimeline({ steps, overallStatus, currentStepOrde
           >
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                Stage 4
+                Stage 6
               </span>
               <StatusBadge status={overallStatus} />
             </div>
@@ -158,7 +175,7 @@ export default function WorkflowTimeline({ steps, overallStatus, currentStepOrde
 
             <div className="pt-2 border-t border-slate-200/60 text-[11px] text-slate-600">
               {overallStatus === 'APPROVED' ? (
-                <p className="text-emerald-700 font-medium">✓ All 3 departments granted clearance</p>
+                <p className="text-emerald-700 font-medium">✓ All 5 departments granted clearance</p>
               ) : overallStatus === 'REJECTED' ? (
                 <p className="text-rose-700 font-medium">✕ Workflow terminated due to rejection</p>
               ) : (
