@@ -72,9 +72,17 @@ export default function DocumentVerificationCard({
           <FileText className="w-5 h-5 text-govblue-600" />
 
           <div>
-            <p className="font-semibold text-sm">
-              {document.document_type?.toUpperCase()}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="font-semibold text-sm">
+                {document.document_type?.toUpperCase()}
+              </p>
+
+              {document.source === "DIGILOCKER" && (
+                <span className="px-2 py-1 text-[10px] rounded-full bg-blue-100 text-blue-700 font-bold">
+                  DIGILOCKER
+                </span>
+              )}
+            </div>
 
             <p className="text-xs text-slate-500">
               {document.file_name}
@@ -86,14 +94,25 @@ export default function DocumentVerificationCard({
       </div>
 
       <div className="mt-4 flex items-center gap-2">
+        {document.demoFile ? (
         <a
-          href={`http://localhost:8000/${document.file_path.replace(/\\/g, "/")}`}
+          href={document.demoFile}
+          target="_blank"
+          rel="noreferrer"
+          className="px-3 py-2 text-xs bg-blue-100 text-blue-700 rounded-lg"
+        >
+          View DigiLocker Document
+        </a>
+      ) : (
+        <a
+          href={document.file_path}
           target="_blank"
           rel="noreferrer"
           className="px-3 py-2 text-xs bg-slate-100 rounded-lg hover:bg-slate-200"
         >
           View Document
         </a>
+      )}
 
        {canVerify && document.verification_status === "PENDING" && (
         <>

@@ -182,7 +182,7 @@ export default function NewApplication({
 
             <div>
               <label className="block text-xs font-semibold mb-1">
-                PAN Document
+                Document
               </label>
 
               <select
@@ -195,15 +195,12 @@ export default function NewApplication({
                 }
                 className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl"
               >
-                <option value="">Select PAN</option>
+                <option value="">Select Document</option>
 
-                {documents
-                  .filter((d) => d.document_type.toLowerCase() === "pan")
-                  .map((doc) => (
-                    <option key={doc.id} value={doc.id}>
-                      {doc.file_name}
-                    </option>
-                ))}
+                {documents.map((doc) => (
+                  <option key={doc.id} value={doc.id}>
+                  {doc.document_type} - {doc.file_name}
+                </option>))}
               </select>
             </div>
           </div>

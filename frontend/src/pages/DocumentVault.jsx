@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import DocumentVerificationCard from "../components/DocumentVerificationCard";
 
+
+
   export default function DocumentVault({
     currentUser
   }) {
@@ -52,6 +54,27 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
     }
   };
 
+const handleDigilockerFetch = async () => {
+  try {
+    const formData = new FormData();
+
+    formData.append("document_type", documentType);
+    formData.append("user_id", userId);
+
+    await axios.post(
+      "http://127.0.0.1:8000/api/v1/documents/digilocker-fetch",
+      formData
+    );
+
+    alert(`${documentType} fetched from DigiLocker`);
+
+    loadDocuments();
+  } catch (err) {
+    console.error(err);
+    alert("DigiLocker fetch failed");
+  }
+};
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">
@@ -93,6 +116,15 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
           >
             Upload
           </button>
+
+          <button
+            type="button"
+            onClick={handleDigilockerFetch}
+            className="bg-green-600 text-white px-4 py-2 rounded ml-3"
+          >
+            Fetch from DigiLocker
+          </button>
+
         </form>
       </div>
   )}
