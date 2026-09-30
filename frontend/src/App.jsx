@@ -3,7 +3,6 @@ import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import Login from './pages/Login';
 import PortalSelection from './pages/PortalSelection';
-import PaymentPage from './pages/PaymentPage';
 import Register from './pages/Register';
 import CitizenDashboard from './pages/CitizenDashboard';
 import NewApplication from './pages/NewApplication';
@@ -159,13 +158,6 @@ export default function App() {
             />
           )}
 
-          {currentView === 'payment' && selectedAppId && (
-            <PaymentPage
-              applicationId={selectedAppId}
-              onBack={() => setCurrentView('dashboard')}
-              onPaymentComplete={() => setCurrentView('application_details')}
-            />
-          )}
 
           {currentView === 'architecture' && (
             <ArchitectureView />

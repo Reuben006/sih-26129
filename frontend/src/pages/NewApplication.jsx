@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Sparkles, Building2, Send, AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import axios from 'axios';
 import { applicationService } from '../services/applicationService';
+import api from "../services/api";
 
 export default function NewApplication({
   onCancel,
@@ -26,6 +27,7 @@ export default function NewApplication({
   const [validationErrors, setValidationErrors] = useState({});
 
   const [documents, setDocuments] = useState([]);
+  const [paymentStatus, setPaymentStatus] = useState('PENDING');
 
   const [selectedDocs, setSelectedDocs] = useState({
     pan_document: '',
@@ -83,16 +85,10 @@ export default function NewApplication({
   const loadDocuments = async () => {
     try {
        console.log(currentUser);
-      const token = localStorage.getItem("govconnect_token");
 
-      const res = await axios.get(
-         `http://localhost:8000/api/v1/documents/${currentUser.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          } 
-        }
-      );
+    const res = await api.get(
+      `/documents/${currentUser.id}`
+    );
 
       setDocuments(res.data);
     } catch (err) {
@@ -100,33 +96,44 @@ export default function NewApplication({
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    if (!validate()) return;
-
-    setLoading(true);
-    try {
-      const created = await applicationService.createApplication({
-        ...formData,
-        pan: formData.pan.trim().toUpperCase(),
-
-        selected_documents: [
-          Number(selectedDocs.pan_document)
-        ]
-      });
-      onSuccess(created.id);
-    } catch (err) {
-      const detail = err.response?.data?.detail;
-      setError(
-        typeof detail === 'object'
-          ? detail.message || JSON.stringify(detail)
-          : detail || 'Failed to submit application. Please verify details.'
-      );
-    } finally {
-      setLoading(false);
-    }
+  const handlePayment = () => {
+    setPaymentStatus('SUCCESS');
   };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  if (!validate()) return;
+
+  if (paymentStatus !== 'SUCCESS') {
+    setError('Please complete the application fee payment before submitting.');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const created = await applicationService.createApplication({
+      ...formData,
+      pan: formData.pan.trim().toUpperCase(),
+
+      selected_documents: [
+        Number(selectedDocs.pan_document)
+      ],
+
+      payment_completed: true
+    });
+    onSuccess(created.id);
+  } catch (err) {
+    const detail = err.response?.data?.detail;
+    setError(
+      typeof detail === 'object'
+        ? detail.message || JSON.stringify(detail)
+        : detail || 'Failed to submit application. Please verify details.'
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -355,6 +362,53 @@ export default function NewApplication({
           )}
         </div>
 
+        {/* Payment Section */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-sm font-bold text-slate-800">
+                Application Fee Payment
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Complete the application fee before submitting the clearance request.
+              </p>
+            </div>
+
+            <div className="text-right">
+              <p className="text-xs text-slate-500">Application Fee</p>
+              <p className="text-lg font-black text-slate-900">₹500</p>
+            </div>
+          </div>
+
+          {paymentStatus === 'SUCCESS' ? (
+            <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <div>
+                  <p className="text-xs font-bold text-emerald-800">
+                    Payment Successful
+                  </p>
+                  <p className="text-[11px] text-emerald-700">
+                    Application fee of ₹500 has been paid.
+                  </p>
+                </div>
+              </div>
+
+              <span className="text-[11px] font-bold text-emerald-700">
+                PAID
+              </span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handlePayment}
+              className="w-full px-5 py-3 rounded-xl text-xs font-bold text-white bg-govblue-900 hover:bg-govblue-800 shadow-md transition"
+            >
+              Pay ₹500
+            </button>
+          )}
+        </div>
+
         {/* Action Button */}
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
@@ -366,10 +420,15 @@ export default function NewApplication({
           </button>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || paymentStatus !== 'SUCCESS'}
             className="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-govblue-900 hover:bg-govblue-800 shadow-md transition flex items-center gap-2 disabled:opacity-50"
           >
-            {loading ? 'Orchestrating Interoperability...' : 'Submit & Initiate Clearance'}
+            {loading
+              ? 'Orchestrating Interoperability...'
+              : paymentStatus === 'SUCCESS'
+                ? 'Submit & Initiate Clearance'
+                : 'Complete Payment to Submit'
+              }
             <Send className="w-3.5 h-3.5 text-govsaffron-500" />
           </button>
         </div>

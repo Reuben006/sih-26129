@@ -52,10 +52,10 @@ def digilocker_fetch(
     db: Session = Depends(get_db)
 ):
     file_map = {
-        "PAN": "http://localhost:8000/uploads/documents/pan.png",
-        "GST": "http://localhost:8000/uploads/documents/gst.png",
-        "ADDRESS_PROOF": "http://localhost:8000/uploads/documents/aadhar.png",
-        "SHOP_LICENSE": "http://localhost:8000/uploads/documents/shop.png"
+        "PAN": "https://govconnect-backend-ogly.onrender.com/uploads/documents/pan.png",
+        "GST": "https://govconnect-backend-ogly.onrender.com/uploads/documents/gst.png",
+        "ADDRESS_PROOF": "https://govconnect-backend-ogly.onrender.com/uploads/documents/aadhar.png",
+        "SHOP_LICENSE": "https://govconnect-backend-ogly.onrender.com/uploads/documents/shop.png"
     }
 
     file_path = file_map.get(document_type)

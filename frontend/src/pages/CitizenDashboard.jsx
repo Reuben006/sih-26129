@@ -174,23 +174,13 @@ export default function CitizenDashboard({ onNavigateNew, onSelectApplication, o
                       <StatusBadge status={app.overall_status} />
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      {app.overall_status === 'PAYMENT_PENDING' ? (
-                        <button
-                          onClick={() => onNavigatePayment(app.id)}
-                          className="px-3 py-1.5 rounded-lg bg-govsaffron-500 hover:bg-govsaffron-600 text-slate-950 font-bold transition flex items-center gap-1 ml-auto"
-                        >
-                          <span>Pay Now</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => onSelectApplication(app.id)}
-                          className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-govblue-900 hover:text-white text-slate-700 font-medium transition flex items-center gap-1 ml-auto"
-                        >
-                          <span>View Tracking</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                      <button 
+                        onClick={() => onSelectApplication(app.id)} 
+                        className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-govblue-900 hover:text-white text-slate-700 font-medium transition flex items-center gap-1 ml-auto" 
+                      >
+                        <span>View Tracking</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
                     </td>
                   </tr>
                 ))}

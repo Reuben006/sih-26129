@@ -19,7 +19,10 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
     
     # Interop Connectors Base URL (for calling mock systems internally if needed)
-    BASE_URL: str = os.getenv("BASE_URL", "http://localhost:8000")
+    BASE_URL: str = os.getenv(
+        "BASE_URL",
+        "https://govconnect-backend-ogly.onrender.com"
+    )
 
     # Updated configuration block for Pydantic v2
     model_config = SettingsConfigDict(
