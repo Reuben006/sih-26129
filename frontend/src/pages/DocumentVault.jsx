@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../services/api";
 import DocumentVerificationCard from "../components/DocumentVerificationCard";
 
 
@@ -12,7 +12,7 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
   const [file, setFile] = useState(null);
   const [documentType, setDocumentType] = useState("PAN");
 
-  const userId = 1; // replace later with logged-in user
+  const userId = currentUser?.id;
 
   const loadDocuments = async () => {
     const res = await axios.get(
@@ -54,15 +54,15 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
     }
   };
 
-const handleDigilockerFetch = async () => {
+  const handleDigilockerFetch = async () => {
   try {
     const formData = new FormData();
 
     formData.append("document_type", documentType);
     formData.append("user_id", userId);
 
-    await axios.post(
-      "http://127.0.0.1:8000/api/v1/documents/digilocker-fetch",
+    await api.post(
+      "/documents/digilocker-fetch",
       formData
     );
 
