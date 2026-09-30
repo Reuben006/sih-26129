@@ -30,6 +30,17 @@ export const applicationService = {
     return res.data;
   },
 
+  // Payments
+  async getPayment(appId) {
+    const res = await api.get(`/payments/applications/${appId}`);
+    return res.data;
+  },
+
+  async makePayment(appId) {
+    const res = await api.post(`/payments/applications/${appId}/pay`);
+    return res.data;
+  },
+
   // Workflows
   async getWorkflows() {
     const res = await api.get('/workflows');

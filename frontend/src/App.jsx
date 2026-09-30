@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import Login from './pages/Login';
+import PortalSelection from './pages/PortalSelection';
+import PaymentPage from './pages/PaymentPage';
 import Register from './pages/Register';
 import CitizenDashboard from './pages/CitizenDashboard';
 import NewApplication from './pages/NewApplication';
@@ -14,12 +16,20 @@ import { authService } from './services/authService';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(authService.getCurrentUser());
-  const [authPage, setAuthPage] = useState('login');
+  const [authPage, setAuthPage] = useState('portal');
+  const [selectedPortal, setSelectedPortal] = useState(null);
   const [currentView, setCurrentView] = useState('dashboard');
   const [selectedAppId, setSelectedAppId] = useState(null);
 
   const refreshUser = () => {
-    setCurrentUser(authService.getCurrentUser());
+    const user = authService.getCurrentUser();
+    setCurrentUser(user);
+    if (!user) {
+      setAuthPage('portal');
+      setSelectedPortal(null);
+      setCurrentView('dashboard');
+      setSelectedAppId(null);
+    }
   };
 
   useEffect(() => {
@@ -34,38 +44,47 @@ export default function App() {
     };
   }, []);
 
-  const handleSwitchPersona = async (email) => {
-    try {
-      await authService.login(email, 'Password123!');
-      refreshUser();
-      setCurrentView('dashboard');
-      setSelectedAppId(null);
-    } catch {
-      alert('Failed to switch persona');
-    }
-  };
-
   const handleSelectApplication = (id) => {
     setSelectedAppId(id);
     setCurrentView('application_details');
   };
 
   if (!currentUser) {
-    return authPage === 'login' ? (
+    if (authPage === 'portal') {
+      return (
+        <PortalSelection
+          onSelect={(portal) => {
+            setSelectedPortal(portal);
+            setAuthPage('login');
+          }}
+        />
+      );
+    }
+
+    if (authPage === 'register') {
+      return (
+        <Register
+          onRegisterSuccess={() => {
+            refreshUser();
+            setCurrentView('dashboard');
+          }}
+          onNavigateLogin={() => {
+            setAuthPage('login');
+            setSelectedPortal('CITIZEN');
+          }}
+        />
+      );
+    }
+
+    return (
       <Login
+        portal={selectedPortal}
         onLoginSuccess={() => {
           refreshUser();
           setCurrentView('dashboard');
         }}
         onNavigateRegister={() => setAuthPage('register')}
-      />
-    ) : (
-      <Register
-        onRegisterSuccess={() => {
-          refreshUser();
-          setCurrentView('dashboard');
-        }}
-        onNavigateLogin={() => setAuthPage('login')}
+        onBackToPortals={() => setAuthPage('portal')}
       />
     );
   }
@@ -74,7 +93,7 @@ export default function App() {
     <div className="min-h-screen bg-[#F4F6F9] flex flex-col font-sans text-slate-800">
       <Navbar
         currentUser={currentUser}
-        onSwitchRole={handleSwitchPersona}
+        onSwitchPortal={() => authService.logout()}
         currentView={currentView}
         setCurrentView={setCurrentView}
       />
@@ -96,12 +115,17 @@ export default function App() {
                 <CitizenDashboard
                   onNavigateNew={() => setCurrentView('new_application')}
                   onSelectApplication={handleSelectApplication}
+                  onNavigatePayment={(id) => {
+                    setSelectedAppId(id);
+                    setCurrentView('payment');
+                  }}
                 />
               )}
 
               {currentUser.role === 'OFFICIAL' && (
                 <OfficialDashboard
                   onSelectApplication={handleSelectApplication}
+                  currentUser={currentUser}
                 />
               )}
 
@@ -135,6 +159,14 @@ export default function App() {
             />
           )}
 
+          {currentView === 'payment' && selectedAppId && (
+            <PaymentPage
+              applicationId={selectedAppId}
+              onBack={() => setCurrentView('dashboard')}
+              onPaymentComplete={() => setCurrentView('application_details')}
+            />
+          )}
+
           {currentView === 'architecture' && (
             <ArchitectureView />
           )}
@@ -148,6 +180,7 @@ export default function App() {
           {currentView === 'official_queue' && (
             <OfficialDashboard
               onSelectApplication={handleSelectApplication}
+              currentUser={currentUser}
             />
           )}
 

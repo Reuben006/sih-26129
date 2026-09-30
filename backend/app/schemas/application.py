@@ -5,6 +5,7 @@ import re
 from app.models.application import OverallStatus, DepartmentStatus
 from app.schemas.department import DepartmentOut
 from app.schemas.consent import ConsentOut
+from app.schemas.payment import PaymentOut
 
 class CanonicalApplicationPayload(BaseModel):
     business_name: str = Field(..., min_length=2, max_length=200, examples=["ABC Restaurant"])
@@ -72,6 +73,7 @@ class ApplicationOut(BaseModel):
 class ApplicationDetailOut(ApplicationOut):
     canonical_payload: Optional[Dict[str, Any]] = None
     consents: List[ConsentOut] = []
+    payment: Optional[PaymentOut] = None
 
 class DepartmentActionRequest(BaseModel):
     status: DepartmentStatus # APPROVED, REJECTED, or IN_REVIEW

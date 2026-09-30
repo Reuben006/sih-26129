@@ -12,6 +12,7 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+    portal: str = Field(..., min_length=2, max_length=50)
 
 class UserOut(BaseModel):
     id: int
@@ -19,6 +20,7 @@ class UserOut(BaseModel):
     email: EmailStr
     role: UserRole
     created_at: datetime
+    department_id: Optional[int] = None
 
     class Config:
         from_attributes = True

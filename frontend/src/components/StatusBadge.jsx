@@ -1,10 +1,20 @@
 import React from 'react';
-import { CheckCircle2, Clock, XCircle, AlertTriangle, ArrowRightCircle } from 'lucide-react';
+import { CheckCircle2, Clock, CreditCard, XCircle, AlertTriangle, ArrowRightCircle } from 'lucide-react';
 
 export default function StatusBadge({ status, size = 'sm' }) {
   const norm = (status || 'PENDING').toUpperCase();
 
   const configs = {
+    PAYMENT_PENDING: {
+      bg: 'bg-amber-50 text-amber-700 border-amber-300',
+      icon: CreditCard,
+      label: 'Payment Pending',
+    },
+    PAYMENT_COMPLETED: {
+      bg: 'bg-emerald-50 text-emerald-700 border-emerald-300',
+      icon: CheckCircle2,
+      label: 'Payment Completed',
+    },
     APPROVED: {
       bg: 'bg-emerald-50 text-emerald-700 border-emerald-300',
       icon: CheckCircle2,

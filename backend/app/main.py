@@ -20,6 +20,7 @@ from app.api.dashboard import router as dashboard_router
 from app.api.notifications import router as notifications_router
 from app.api.mock_departments import router as mock_departments_router
 from app.api.documents import router as documents_router
+from app.api.payment import router as payment_router
 
 
 @asynccontextmanager
@@ -83,6 +84,7 @@ app.include_router(notifications_router, prefix=settings.API_V1_STR)
 app.include_router(mock_departments_router, prefix=settings.API_V1_STR)
 app.include_router(documents_router, prefix=settings.API_V1_STR)
 app.include_router(verification_router,prefix=settings.API_V1_STR)
+app.include_router(payment_router, prefix=settings.API_V1_STR)
 
 @app.get("/health", tags=["System Health"])
 def health_check():

@@ -11,8 +11,8 @@ export const authService = {
     return res.data;
   },
 
-  async login(email, password) {
-    const res = await api.post('/auth/login', { email, password });
+  async login(email, password, portal) {
+    const res = await api.post('/auth/login', { email, password, portal });
     if (res.data.access_token) {
       localStorage.setItem('govconnect_token', res.data.access_token);
       localStorage.setItem('govconnect_user', JSON.stringify(res.data.user));

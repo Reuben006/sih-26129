@@ -7,6 +7,7 @@ from app.models.audit import AuditLog
 from app.models.notification import Notification
 from app.models.document import Document
 from app.models.document_verification import DocumentVerification
+from app.models.payment import ApplicationPayment, PaymentStatus
 
 __all__ = [
     "User",
@@ -21,5 +22,7 @@ __all__ = [
     "Consent",
     "ConsentStatus",
     "AuditLog",
-    "Notification"
+    "Notification",
+    "ApplicationPayment",
+    "PaymentStatus"
 ]

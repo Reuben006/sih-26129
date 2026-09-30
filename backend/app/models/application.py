@@ -10,6 +10,8 @@ class OverallStatus(str, enum.Enum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
     FAILED = "FAILED"
+    PAYMENT_PENDING = "PAYMENT_PENDING"
+    PAYMENT_COMPLETED = "PAYMENT_COMPLETED"
 
 class DepartmentStatus(str, enum.Enum):
     PENDING = "PENDING"
@@ -53,6 +55,7 @@ class Application(Base):
     consents = relationship("Consent", back_populates="application", cascade="all, delete-orphan")
     audit_logs = relationship("AuditLog", back_populates="application", cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="application", cascade="all, delete-orphan")
+    payment = relationship("ApplicationPayment", back_populates="application", uselist=False, cascade="all, delete-orphan")
 
 class ApplicationDepartment(Base):
     __tablename__ = "application_departments"

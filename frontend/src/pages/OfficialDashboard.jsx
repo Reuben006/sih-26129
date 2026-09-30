@@ -3,10 +3,17 @@ import { ShieldCheck, CheckCircle2, XCircle, RefreshCw, Filter, Building2, Utens
 import { applicationService } from '../services/applicationService';
 import StatusBadge from '../components/StatusBadge';
 
-export default function OfficialDashboard({ onSelectApplication }) {
+const DEPARTMENT_NAMES = {
+  1: 'Municipality',
+  2: 'FSSAI',
+  3: 'Fire Services',
+  4: 'GST & Tax',
+  5: 'Shops & Establishments',
+};
+
+export default function OfficialDashboard({ onSelectApplication, currentUser }) {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDeptFilter, setSelectedDeptFilter] = useState('ALL');
   const [actionRemarks, setActionRemarks] = useState('');
   const [activeAction, setActiveAction] = useState(null); // { appId, deptId, action: 'APPROVED' | 'REJECTED' }
 
@@ -48,12 +55,9 @@ export default function OfficialDashboard({ onSelectApplication }) {
   applications.forEach((app) => {
     app.department_statuses?.forEach((ds) => {
       if (['SUBMITTED', 'IN_REVIEW', 'PENDING'].includes(ds.status)) {
-        if (selectedDeptFilter === 'ALL' || ds.department?.code === selectedDeptFilter) {
-          pendingTasks.push({
-            app,
-            ds,
-          });
-        }
+        // The backend already scopes applications to the authenticated official's department.
+        // Do not expose a department filter here: switching departments requires a separate login.
+        pendingTasks.push({ app, ds });
       }
     });
   });
@@ -75,20 +79,9 @@ export default function OfficialDashboard({ onSelectApplication }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
-            {['ALL', 'MUNICIPALITY', 'FSSAI', 'FIRE' , 'GST' , 'SHOPS'].map((dept) => (
-              <button
-                key={dept}
-                onClick={() => setSelectedDeptFilter(dept)}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition ${
-                  selectedDeptFilter === dept
-                    ? 'bg-govblue-900 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {dept}
-              </button>
-            ))}
+          <div className="px-3 py-2 rounded-xl bg-govblue-50 border border-govblue-100 text-xs text-govblue-900">
+            <span className="text-slate-500">Assigned Department: </span>
+            <span className="font-bold">{currentUser?.department?.name || currentUser?.department_name || DEPARTMENT_NAMES[currentUser?.department_id] || 'Assigned Department'}</span>
           </div>
 
           <button
@@ -160,7 +153,7 @@ export default function OfficialDashboard({ onSelectApplication }) {
           <div className="py-16 text-center text-slate-400 space-y-2">
             <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
             <p className="text-sm font-semibold text-slate-700">All tasks completed</p>
-            <p className="text-xs">No pending items for the selected department filter</p>
+            <p className="text-xs">No pending items for your assigned department</p>
           </div>
         ) : (
           <div className="overflow-x-auto">

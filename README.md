@@ -1,4 +1,4 @@
-# GovConnect — Government Interoperability Middleware Layer
+# GovBridge — Government Interoperability Middleware Layer
 ### Smart India Hackathon (SIH 2026) • Problem Statement 129
 > **Federated Service Architecture Connecting Heterogeneous Government Systems Without Replacing Legacy Portals**
 
@@ -8,7 +8,7 @@
 
 Government departments operate multiple portals, mobile applications, registries, workflow systems, and databases that were developed independently. They feature incompatible data formats, unique local identifiers, distinct authentication mechanisms, and siloed databases.
 
-**GovConnect** is NOT another generic government portal. It is an **Interoperability Middleware Layer (Federated Service Architecture)** designed to act as the national digital glue. It enables businesses and citizens to submit common information **ONCE**, orchestrating statutory clearances across Municipal Corporations, Food Safety (FSSAI), and Fire Departments without replacing or migrating their existing legacy systems.
+**GovBridge** is NOT another generic government portal. It is an **Interoperability Middleware Layer (Federated Service Architecture)** designed to act as the national digital glue. It enables businesses and citizens to submit common information **ONCE**, orchestrating statutory clearances across Municipal Corporations, Food Safety (FSSAI), and Fire Departments without replacing or migrating their existing legacy systems.
 
 ---
 
@@ -68,7 +68,7 @@ Government departments operate multiple portals, mobile applications, registries
 ## 📂 Project Structure
 
 ```text
-govconnect/
+GovBridge/
 ├── backend/
 │   ├── app/
 │   │   ├── api/                  # REST API endpoints & mock systems

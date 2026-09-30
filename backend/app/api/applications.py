@@ -13,7 +13,7 @@ from app.schemas.application import (
     ApplicationDepartmentOut,
     DepartmentActionRequest
 )
-from app.api.deps import get_current_user, get_current_official_or_admin
+from app.api.deps import get_current_user, get_current_official_or_admin, require_department_official
 from app.services.application_service import ApplicationService
 from app.workflow.engine import WorkflowEngine
 
@@ -89,6 +89,12 @@ async def update_department_status(
     Department action handler: Allows department officials to approve or reject an application stage.
     Triggers the workflow engine to orchestrate the next department or finalize the application.
     """
+    if current_user.role == UserRole.OFFICIAL and current_user.department_id != department_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This official is not assigned to the selected department."
+        )
+
     success, message, extra = await WorkflowEngine.process_department_decision(
         db=db,
         application_id=app_id,

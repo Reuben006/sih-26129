@@ -136,8 +136,20 @@ class ApplicationService:
     @staticmethod
     def get_applications(db: Session, user: User) -> List[Application]:
         if user.role == UserRole.CITIZEN:
-            return db.query(Application).filter(Application.user_id == user.id).order_by(Application.created_at.desc()).all()
-        # OFFICIAL and ADMIN can see all applications
+            return db.query(Application).filter(
+                Application.user_id == user.id
+            ).order_by(Application.created_at.desc()).all()
+
+        if user.role == UserRole.OFFICIAL:
+            return (
+                db.query(Application)
+                .join(ApplicationDepartment)
+                .filter(ApplicationDepartment.department_id == user.department_id)
+                .distinct()
+                .order_by(Application.created_at.desc())
+                .all()
+            )
+
         return db.query(Application).order_by(Application.created_at.desc()).all()
 
     @staticmethod
@@ -145,6 +157,10 @@ class ApplicationService:
         query = db.query(Application).filter(Application.id == app_id)
         if user.role == UserRole.CITIZEN:
             query = query.filter(Application.user_id == user.id)
+        elif user.role == UserRole.OFFICIAL:
+            query = query.join(ApplicationDepartment).filter(
+                ApplicationDepartment.department_id == user.department_id
+            )
         return query.first()
 
     @staticmethod

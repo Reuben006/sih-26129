@@ -4,7 +4,7 @@ import { authService } from '../services/authService';
 import { applicationService } from '../services/applicationService';
 import NotificationDrawer from './NotificationDrawer';
 
-export default function Navbar({ currentUser, onSwitchRole, currentView, setCurrentView }) {
+export default function Navbar({ currentUser, onSwitchPortal, currentView, setCurrentView }) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -119,43 +119,15 @@ export default function Navbar({ currentUser, onSwitchRole, currentView, setCurr
             {/* Persona Switcher, Architecture Shortcut & Controls */}
             {currentUser && (
               <div className="flex items-center gap-3">
-                {/* Hackathon Judge Persona Switcher */}
-                <div className="hidden lg:flex items-center bg-govblue-800/90 rounded-lg p-1 border border-blue-700/50 text-xs">
-                  <span className="px-2 text-slate-400 font-medium">Demo Persona:</span>
-                  <button
-                    type="button"
-                    onClick={() => onSwitchRole('citizen@govconnect.in')}
-                    className={`px-2.5 py-1 rounded font-medium transition ${
-                      currentUser.role === 'CITIZEN'
-                        ? 'bg-govblue-500 text-white shadow-sm'
-                        : 'text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    Citizen
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onSwitchRole('official@govconnect.in')}
-                    className={`px-2.5 py-1 rounded font-medium transition ${
-                      currentUser.role === 'OFFICIAL'
-                        ? 'bg-govblue-500 text-white shadow-sm'
-                        : 'text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    Official
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onSwitchRole('admin@govconnect.in')}
-                    className={`px-2.5 py-1 rounded font-medium transition ${
-                      currentUser.role === 'ADMIN'
-                        ? 'bg-govblue-500 text-white shadow-sm'
-                        : 'text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    Admin
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={onSwitchPortal}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-blue-700 bg-govblue-800/60 text-slate-200 hover:bg-govblue-800 transition"
+                  title="Switch account and sign in again"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Switch Account</span>
+                </button>
 
                 {/* Architecture Shortcut */}
                 <button

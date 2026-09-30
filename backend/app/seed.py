@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import inspect, text
 from app.core.database import SessionLocal, engine, Base
 from app.core.security import hash_password
 from app.models import (
@@ -14,25 +15,62 @@ def seed_database():
     db: Session = SessionLocal()
 
     try:
-        # 1. Seed Users (Citizen, Official, Admin)
+        # Lightweight SQLite migration for the department-scoped official accounts.
+        columns = {col["name"] for col in inspect(engine).get_columns("users")}
+        if "department_id" not in columns:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE users ADD COLUMN department_id INTEGER"))
+
+        # 1. Seed base identities. Department assignments are applied after departments exist.
         users_data = [
             {
                 "name": "Swayam Dudhela",
                 "email": "citizen@govconnect.in",
                 "password": "Password123!",
-                "role": UserRole.CITIZEN
+                "role": UserRole.CITIZEN,
+                "department_code": None
             },
             {
-                "name": "Officer Rajesh Sharma",
+                "name": "Municipality Officer Rajesh Sharma",
                 "email": "official@govconnect.in",
                 "password": "Password123!",
-                "role": UserRole.OFFICIAL
+                "role": UserRole.OFFICIAL,
+                "department_code": "MUNICIPALITY"
             },
             {
                 "name": "Admin Meera Verma",
                 "email": "admin@govconnect.in",
                 "password": "Password123!",
-                "role": UserRole.ADMIN
+                "role": UserRole.ADMIN,
+                "department_code": None
+            },
+            {
+                "name": "FSSAI Officer Priya Nair",
+                "email": "fssai@govconnect.in",
+                "password": "Password123!",
+                "role": UserRole.OFFICIAL,
+                "department_code": "FSSAI"
+            },
+            {
+                "name": "Fire Officer Amit Kulkarni",
+                "email": "fire@govconnect.in",
+                "password": "Password123!",
+                "role": UserRole.OFFICIAL,
+                "department_code": "FIRE"
+            },
+            {
+                "name": "GST Officer Neha Shah",
+                "email": "gst@govconnect.in",
+                "password": "Password123!",
+                "role": UserRole.OFFICIAL,
+                "department_code": "GST"
+            },
+            {
+                "name": "Shops Officer Rohan Patil",
+                "email": "shops@govconnect.in",
+                "password": "Password123!",
+                "role": UserRole.OFFICIAL,
+                "department_code": "SHOPS"
             }
         ]
 
@@ -99,6 +137,18 @@ def seed_database():
                 db.add(dept)
         db.commit()
 
+        # Assign every official account to exactly one department.
+        for u in users_data:
+            if u["role"] != UserRole.OFFICIAL or not u["department_code"]:
+                continue
+            user = db.query(User).filter(User.email == u["email"]).first()
+            dept = db.query(Department).filter(
+                Department.code == u["department_code"]
+            ).first()
+            if user and dept:
+                user.department_id = dept.id
+        db.commit()
+
         # 3. Seed Workflows
         wf_existing = db.query(Workflow).filter(Workflow.code == "RESTAURANT_APPROVAL").first()
         if not wf_existing:
@@ -127,6 +177,29 @@ def seed_database():
 
                 db.add_all([s1, s2, s3, s4, s5])
 
+            db.commit()
+
+        # Backfill missing workflow steps when an older database already has the workflow.
+        wf = db.query(Workflow).filter(Workflow.code == "RESTAURANT_APPROVAL").first()
+        if wf:
+            required_codes = ["MUNICIPALITY", "FSSAI", "FIRE", "GST", "SHOPS"]
+            existing_steps = {
+                db.query(Department).filter(Department.id == step.department_id).first().code: step
+                for step in db.query(WorkflowStep).filter(
+                    WorkflowStep.workflow_id == wf.id
+                ).all()
+                if db.query(Department).filter(Department.id == step.department_id).first()
+            }
+            for order, code in enumerate(required_codes, start=1):
+                if code not in existing_steps:
+                    dept = db.query(Department).filter(Department.code == code).first()
+                    if dept:
+                        db.add(WorkflowStep(
+                            workflow_id=wf.id,
+                            department_id=dept.id,
+                            step_order=order,
+                            required=True
+                        ))
             db.commit()
 
         print("Database initialized and seeded successfully.")

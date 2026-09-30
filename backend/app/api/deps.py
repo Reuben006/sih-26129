@@ -57,3 +57,22 @@ async def get_current_admin(
             detail="Administrative privileges required."
         )
     return current_user
+
+
+async def require_department_official(
+    department_id: int,
+    current_user: User = Depends(get_current_user)
+) -> User:
+    if current_user.role == UserRole.ADMIN:
+        return current_user
+    if current_user.role != UserRole.OFFICIAL:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access restricted to department officials."
+        )
+    if current_user.department_id != department_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This official is not assigned to the selected department."
+        )
+    return current_user

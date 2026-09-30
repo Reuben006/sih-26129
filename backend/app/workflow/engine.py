@@ -102,6 +102,21 @@ class WorkflowEngine:
 
         dept_name = app_dept.department.name
 
+        # A department can act only after GovConnect has dispatched this stage.
+        if decision_status in [DepartmentStatus.APPROVED, DepartmentStatus.REJECTED]:
+            if app_dept.status not in [DepartmentStatus.SUBMITTED, DepartmentStatus.IN_REVIEW]:
+                return False, f"{dept_name} cannot act before this application is dispatched to the department.", {}
+
+            workflow_steps = db.query(WorkflowStep).filter(
+                WorkflowStep.workflow_id == application.workflow_id
+            ).order_by(WorkflowStep.step_order).all()
+            active_step = next(
+                (s for s in workflow_steps if s.department_id == department_id),
+                None
+            )
+            if active_step and active_step.step_order != application.current_step_order:
+                return False, f"{dept_name} cannot act before the current workflow stage is completed.", {}
+
         # Update department state
         app_dept.status = decision_status
         app_dept.completed_at = datetime.now(timezone.utc)
@@ -209,29 +224,31 @@ class WorkflowEngine:
                     "next_department": next_step.department.name
                 }
             else:
-                # All steps approved!
-                application.overall_status = OverallStatus.APPROVED
+                # All departments approved. Citizen payment is now the final gate.
+                application.overall_status = OverallStatus.PAYMENT_PENDING
                 db.commit()
 
                 AuditService.log(
                     db=db,
-                    action="APPLICATION_APPROVED",
+                    action="ALL_DEPARTMENTS_APPROVED",
                     entity="WORKFLOW",
                     user_id=officer_user_id,
                     application_id=application.id,
-                    details={"message": "All required department clearances completed successfully."}
+                    details={
+                        "message": "All required department clearances completed. Awaiting citizen payment."
+                    }
                 )
 
                 NotificationService.send(
                     db=db,
                     user_id=application.user_id,
                     application_id=application.id,
-                    title="Unified Restaurant Clearance Granted!",
-                    message=f"Application {application.application_number} has successfully received all approvals from Municipal Corporation, FSSAI, and Fire Department.",
+                    title="All Department Clearances Granted",
+                    message=f"Application {application.application_number} has received all required departmental approvals. Payment is now available.",
                     msg_type="SUCCESS"
                 )
 
-                return True, "All departments approved! Unified Clearance granted.", {
+                return True, "All departments approved. Payment is now available to the citizen.", {
                     "overall_status": application.overall_status.value
                 }
 
