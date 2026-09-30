@@ -11,6 +11,8 @@ from app.workflow.engine import WorkflowEngine
 from app.services.consent_service import ConsentService
 from app.services.audit_service import AuditService
 from app.services.notification_service import NotificationService
+from app.models.payment import ApplicationPayment, PaymentStatus
+import secrets
 
 class ApplicationService:
     @staticmethod
@@ -80,9 +82,20 @@ class ApplicationService:
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc)
         )
-        db.add(application)
-        db.commit()
-        db.refresh(application)
+        if app_in.payment_completed:
+            suffix = secrets.token_hex(4).upper()
+
+            payment = ApplicationPayment(
+                    application=application,
+                    amount=500.0,
+                    status=PaymentStatus.PAID,
+                    transaction_id=f"TXN-{application.application_number}-{suffix}",
+                    receipt_number=f"RCT-{application.application_number}-{suffix}",
+                    paid_at=datetime.now(timezone.utc)
+                )
+
+            db.add(payment)
+            db.commit()
 
         for doc_id in app_in.selected_documents:
             doc = db.query(Document).filter(

@@ -206,6 +206,12 @@ class WorkflowEngine:
                     db.commit()
                     return True, f"Approved by {dept_name}, but dispatch to next department ({next_step.department.name}) failed.", {"overall_status": application.overall_status.value}
 
+                # Auto-approve final Unified Clearance stage
+                if next_step.step_order == workflow_steps[-1].step_order:
+                    next_app_dept.status = DepartmentStatus.APPROVED
+                    next_app_dept.completed_at = datetime.now(timezone.utc)
+                    db.commit()
+
                 AuditService.log(
                     db=db,
                     action="WORKFLOW_ADVANCED",
@@ -223,9 +229,8 @@ class WorkflowEngine:
                     "overall_status": application.overall_status.value,
                     "next_department": next_step.department.name
                 }
-            else:
-                # All departments approved. Citizen payment is now the final gate.
-                application.overall_status = OverallStatus.PAYMENT_PENDING
+        else:
+                # All departments approved.
                 db.commit()
 
                 AuditService.log(
@@ -235,7 +240,7 @@ class WorkflowEngine:
                     user_id=officer_user_id,
                     application_id=application.id,
                     details={
-                        "message": "All required department clearances completed. Awaiting citizen payment."
+                        "message": "All required department clearances completed."
                     }
                 )
 
@@ -244,12 +249,11 @@ class WorkflowEngine:
                     user_id=application.user_id,
                     application_id=application.id,
                     title="All Department Clearances Granted",
-                    message=f"Application {application.application_number} has received all required departmental approvals. Payment is now available.",
+                    message=f"Application {application.application_number} has received all required departmental approvals.",
                     msg_type="SUCCESS"
                 )
 
-                return True, "All departments approved. Payment is now available to the citizen.", {
+                return True, "All departments approved.", {
                     "overall_status": application.overall_status.value
                 }
-
         return True, f"Department status updated to {decision_status.value}", {"overall_status": application.overall_status.value}

@@ -36,6 +36,7 @@ class ApplicationCreate(CanonicalApplicationPayload):
     grant_consent: bool = True
 
     selected_documents: list[int] = []
+    payment_completed: bool = False
 
 class ApplicationDepartmentOut(BaseModel):
     id: int

@@ -6,6 +6,7 @@ import {
   Clock3,
   FileText
 } from 'lucide-react';
+import api from "../services/api";
 
 export default function DocumentVerificationCard({
   document,
@@ -14,8 +15,8 @@ export default function DocumentVerificationCard({
 }) {
   const verifyDocument = async (status) => {
     try {
-      await axios.patch(
-        `http://localhost:8000/api/v1/documents/${document.id}/verify`,
+      await api.patch(
+        `/documents/${document.id}/verify`,
         {
           status,
           remarks:

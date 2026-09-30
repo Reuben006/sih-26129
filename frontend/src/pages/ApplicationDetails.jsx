@@ -20,6 +20,7 @@ import TransformationViewer from '../components/TransformationViewer';
 import AuditLogTable from '../components/AuditLogTable';
 import ConsentModal from '../components/ConsentModal';
 import StatusBadge from '../components/StatusBadge';
+import api from "../services/api";
 
 export default function ApplicationDetails({ applicationId, onBack, currentUser }) {
   const [app, setApp] = useState(null);
@@ -50,15 +51,8 @@ export default function ApplicationDetails({ applicationId, onBack, currentUser 
 
   const loadDocuments = async () => {
     try {
-      const token = localStorage.getItem("govconnect_token");
-
-      const res = await axios.get(
-        `http://localhost:8000/api/v1/applications/${applicationId}/documents`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const res = await api.get(
+        `/applications/${applicationId}/documents`
       );
 
       setDocuments(res.data);
