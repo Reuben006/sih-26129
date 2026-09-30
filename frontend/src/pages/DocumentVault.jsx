@@ -15,8 +15,8 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
   const userId = currentUser?.id;
 
   const loadDocuments = async () => {
-    const res = await axios.get(
-      `http://127.0.0.1:8000/api/v1/documents/${userId}`
+    const res = await api.get(
+      `/documents/${userId}`
     );
 
     setDocuments(res.data);
@@ -38,8 +38,8 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
     formData.append("user_id", userId);
     formData.append("file", file);
 
-      await axios.post(
-        "http://127.0.0.1:8000/api/v1/documents/upload",
+      await api.post(
+        "/documents/upload",
         formData
       );
 
