@@ -29,11 +29,7 @@ export default function NewApplication({
   const [documents, setDocuments] = useState([]);
   const [paymentStatus, setPaymentStatus] = useState('PENDING');
 
-  const [selectedDocs, setSelectedDocs] = useState({
-    pan_document: '',
-    aadhaar_document: '',
-    license_document: ''
-  });
+  const [selectedDocs, setSelectedDocs] = useState([]);
 
   // Auto-fill demo values requested in SIH prompt
   const handlePrefillDemo = () => {
@@ -116,12 +112,10 @@ export default function NewApplication({
       ...formData,
       pan: formData.pan.trim().toUpperCase(),
 
-      selected_documents: [
-        Number(selectedDocs.pan_document)
-      ],
+      selected_documents: selectedDocs.map(Number),
 
       payment_completed: true
-    });
+    })
     onSuccess(created.id);
   } catch (err) {
     const detail = err.response?.data?.detail;
@@ -182,35 +176,45 @@ export default function NewApplication({
             <span>Common Establishment & Applicant KYC</span>
           </h2>
 
-          <div className="mb-6 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-700">
-              Attached Documents
-            </h3>
 
-            <div>
-              <label className="block text-xs font-semibold mb-1">
-                Document
-              </label>
+        <div className="mb-6 space-y-4">
+          <h3 className="text-sm font-semibold text-slate-700">
+            Attached Documents
+          </h3>
 
-              <select
-                value={selectedDocs.pan_document}
-                onChange={(e) =>
-                  setSelectedDocs({
-                    ...selectedDocs,
-                    pan_document: e.target.value
-                  })
-                }
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl"
-              >
-                <option value="">Select Document</option>
+          {documents.length === 0 ? (
+            <p className="text-xs text-slate-500">
+              No documents found in Document Vault.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {documents.map((doc) => (
+                <label
+                  key={doc.id}
+                  className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedDocs.includes(doc.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedDocs([...selectedDocs, doc.id]);
+                      } else {
+                        setSelectedDocs(
+                          selectedDocs.filter((id) => id !== doc.id)
+                        );
+                      }
+                    }}
+                  />
 
-                {documents.map((doc) => (
-                  <option key={doc.id} value={doc.id}>
-                  {doc.document_type} - {doc.file_name}
-                </option>))}
-              </select>
+                  <span className="text-sm">
+                    {doc.document_type} - {doc.file_name}
+                  </span>
+                </label>
+              ))}
             </div>
-          </div>
+          )}
+        </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
