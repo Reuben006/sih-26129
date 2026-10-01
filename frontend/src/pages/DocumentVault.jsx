@@ -75,7 +75,7 @@ console.log(res.data);
 
     console.log("DigiLocker response:", res.data);
 
-    alert(f`{${documen_type}fetched from DigiLocker`);
+    alert(`${documentType} fetched from DigiLocker`);
 
     loadDocuments();
   } catch (err) {
