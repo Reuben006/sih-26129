@@ -12,7 +12,7 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
   const [file, setFile] = useState(null);
   const [documentType, setDocumentType] = useState("PAN");
 
-  const userId = currentUser?.id;
+  const userId = 1;
 
   const loadDocuments = async () => {
     const res = await api.get(
@@ -59,18 +59,27 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
     const formData = new FormData();
 
     formData.append("document_type", documentType);
-    formData.append("user_id", userId);
+    formData.append("user_id", "1");
 
-    await api.post(
+    const res = await api.post(
       "/documents/digilocker-fetch",
-      formData
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }
     );
 
-    alert(`${documentType} fetched from DigiLocker`);
+console.log(res.data);
+
+    console.log("DigiLocker response:", res.data);
+
+    alert(f`{${documen_type}fetched from DigiLocker`);
 
     loadDocuments();
   } catch (err) {
-    console.error(err);
+    console.error("DigiLocker error:", err.response?.data || err);
     alert("DigiLocker fetch failed");
   }
 };
