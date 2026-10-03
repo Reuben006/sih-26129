@@ -44,6 +44,7 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
           setSelectedApplicationId(applications[0].id);
         } else {
           console.log("NO APPLICATIONS FOUND =", applications);
+           setSelectedApplicationId(1);
         }
       } catch (err) {
         console.error("Failed to load application:", err);
