@@ -27,6 +27,7 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 async def upload_document(
     document_type: str = Form(...),
     user_id: int = Form(...),
+    application_id: int = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
@@ -35,12 +36,15 @@ async def upload_document(
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
+    file_url = f"https://govconnect-backend-ogly.onrender.com/uploads/documents/{file.filename}"
+
     doc = DocumentService.create_document(
         db=db,
         user_id=user_id,
+        application_id=application_id,
         document_type=document_type,
         file_name=file.filename,
-        file_path=str(file_path)
+        file_path=file_url
     )
 
     return doc
