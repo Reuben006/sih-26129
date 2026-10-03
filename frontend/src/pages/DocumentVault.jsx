@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import { applicationService } from "../services/applicationService";
 import DocumentVerificationCard from "../components/DocumentVerificationCard";
 
 
 
   export default function DocumentVault({
-    currentUser
+    currentUser,
+    applicationId
   }) {
     const canUpload = currentUser?.role === "CITIZEN";
-  const [documents, setDocuments] = useState([]);
-  const [file, setFile] = useState(null);
-  const [documentType, setDocumentType] = useState("PAN");
+    const [documents, setDocuments] = useState([]);
+    const [file, setFile] = useState(null);
+    const [documentType, setDocumentType] = useState("PAN");
+    const [selectedApplicationId, setSelectedApplicationId] = useState(applicationId || null);
 
   const userId = 1;
 
@@ -26,10 +29,36 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
     loadDocuments();
   }, []);
 
+  useEffect(() => {
+    const loadApplication = async () => {
+      if (applicationId) {
+        setSelectedApplicationId(applicationId);
+        return;
+      }
+
+      try {
+        const applications = await applicationService.getApplications();
+
+        if (applications.length > 0) {
+          setSelectedApplicationId(applications[0].id);
+        }
+      } catch (err) {
+        console.error("Failed to load application:", err);
+      }
+    };
+
+    loadApplication();
+  }, [applicationId]);
+
   const handleUpload = async (e) => {
     e.preventDefault();
 
     if (!file) return;
+
+    if (!selectedApplicationId) {
+      alert("No application found");
+      return;
+    }
 
     try{
     const formData = new FormData();
@@ -37,12 +66,17 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
     formData.append("document_type", documentType);
     formData.append("user_id", userId);
     formData.append("file", file);
+    formData.append("application_id", selectedApplicationId);
+
+    console.log("UPLOAD APPLICATION ID =", selectedApplicationId);
 
       await api.post(
         "/documents/upload",
         formData
       );
 
+
+console.log("NEW UPLOAD RESPONSE =", res.data);
       alert("Document uploaded successfully");
 
       setFile(null);
@@ -75,7 +109,7 @@ console.log(res.data);
 
     console.log("DigiLocker response:", res.data);
 
-    alert(f`{${documen_type}fetched from DigiLocker`);
+    alert(`${documentType} fetched from DigiLocker`);
 
     loadDocuments();
   } catch (err) {

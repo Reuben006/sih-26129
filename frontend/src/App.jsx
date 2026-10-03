@@ -102,7 +102,9 @@ export default function App() {
           currentView={currentView}
           setCurrentView={(view) => {
             setCurrentView(view);
-            setSelectedAppId(null);
+            if (view !== 'documents') {
+              setSelectedAppId(null);
+            }
           }}
           currentUser={currentUser}
         />
@@ -166,6 +168,7 @@ export default function App() {
           {currentView === 'documents' && (
             <DocumentVault
               currentUser={currentUser}
+              applicationId={selectedAppId}
             />
           )}
 

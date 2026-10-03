@@ -10,12 +10,14 @@ class DocumentService:
     def create_document(
         db: Session,
         user_id: int,
+        application_id: int,
         document_type: str,
         file_name: str,
         file_path: str
     ):
         doc = Document(
             user_id=user_id,
+            application_id=application_id,
             document_type=document_type,
             file_name=file_name,
             file_path=file_path
