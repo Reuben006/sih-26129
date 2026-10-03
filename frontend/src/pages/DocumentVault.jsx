@@ -38,9 +38,12 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
 
       try {
         const applications = await applicationService.getApplications();
-
         if (applications.length > 0) {
+          console.log("APPLICATIONS =", applications);
+          console.log("SELECTED APPLICATION ID =", applications[0].id);
           setSelectedApplicationId(applications[0].id);
+        } else {
+          console.log("NO APPLICATIONS FOUND =", applications);
         }
       } catch (err) {
         console.error("Failed to load application:", err);
@@ -70,13 +73,13 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
 
     console.log("UPLOAD APPLICATION ID =", selectedApplicationId);
 
-      await api.post(
+      const res = await api.post(
         "/documents/upload",
         formData
       );
 
 
-console.log("NEW UPLOAD RESPONSE =", res.data);
+      console.log("NEW UPLOAD RESPONSE =", res.data);
       alert("Document uploaded successfully");
 
       setFile(null);
@@ -94,6 +97,7 @@ console.log("NEW UPLOAD RESPONSE =", res.data);
 
     formData.append("document_type", documentType);
     formData.append("user_id", "1");
+    formData.append("application_id", selectedApplicationId);
 
     const res = await api.post(
       "/documents/digilocker-fetch",

@@ -53,6 +53,7 @@ async def upload_document(
 def digilocker_fetch(
     document_type: str = Form(...),
     user_id: int = Form(...),
+    application_id: int = Form(...),
     db: Session = Depends(get_db)
 ):
     file_map = {
@@ -74,6 +75,7 @@ def digilocker_fetch(
 
     doc = DocumentService.create_document(
         db=db,
+        application_id=application_id,
         user_id=user_id,
         document_type=document_type,
         file_name=f"{document_type}.png",
