@@ -13,7 +13,7 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
     const [documents, setDocuments] = useState([]);
     const [file, setFile] = useState(null);
     const [documentType, setDocumentType] = useState("PAN");
-    const [selectedApplicationId, setSelectedApplicationId] = useState(applicationId || null);
+    const [selectedApplicationId, setSelectedApplicationId] = useState(applicationId || 1);
 
   const userId = 1;
 
@@ -29,30 +29,11 @@ import DocumentVerificationCard from "../components/DocumentVerificationCard";
     loadDocuments();
   }, []);
 
-  useEffect(() => {
-    const loadApplication = async () => {
+    useEffect(() => {
       if (applicationId) {
         setSelectedApplicationId(applicationId);
-        return;
       }
-
-      try {
-        const applications = await applicationService.getApplications();
-        if (applications.length > 0) {
-          console.log("APPLICATIONS =", applications);
-          console.log("SELECTED APPLICATION ID =", applications[0].id);
-          setSelectedApplicationId(applications[0].id);
-        } else {
-          console.log("NO APPLICATIONS FOUND =", applications);
-           setSelectedApplicationId(1);
-        }
-      } catch (err) {
-        console.error("Failed to load application:", err);
-      }
-    };
-
-    loadApplication();
-  }, [applicationId]);
+    }, [applicationId]);
 
   const handleUpload = async (e) => {
     e.preventDefault();

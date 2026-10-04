@@ -185,75 +185,83 @@ class WorkflowEngine:
 
             next_step = next((s for s in workflow_steps if s.step_order > current_order), None)
 
-            if next_step:
-                # Advance to next department
-                application.current_step_order = next_step.step_order
+        if next_step:
+            # Advance to next department
+            application.current_step_order = next_step.step_order
+            db.commit()
+
+            next_app_dept = db.query(ApplicationDepartment).filter(
+                ApplicationDepartment.application_id == application.id,
+                ApplicationDepartment.department_id == next_step.department_id
+            ).first()
+
+            success, dispatch_res = await InteroperabilityService.dispatch_to_department(
+                db=db,
+                application=application,
+                app_dept=next_app_dept
+            )
+
+            if not success:
+                application.overall_status = OverallStatus.FAILED
                 db.commit()
 
-                next_app_dept = db.query(ApplicationDepartment).filter(
-                    ApplicationDepartment.application_id == application.id,
-                    ApplicationDepartment.department_id == next_step.department_id
-                ).first()
-
-                success, dispatch_res = await InteroperabilityService.dispatch_to_department(
-                    db=db,
-                    application=application,
-                    app_dept=next_app_dept
-                )
-
-                if not success:
-                    application.overall_status = OverallStatus.FAILED
-                    db.commit()
-                    return True, f"Approved by {dept_name}, but dispatch to next department ({next_step.department.name}) failed.", {"overall_status": application.overall_status.value}
-
-                # Auto-approve final Unified Clearance stage
-                if next_step.step_order == workflow_steps[-1].step_order:
-                    next_app_dept.status = DepartmentStatus.APPROVED
-                    next_app_dept.completed_at = datetime.now(timezone.utc)
-                    db.commit()
-
-                AuditService.log(
-                    db=db,
-                    action="WORKFLOW_ADVANCED",
-                    entity="WORKFLOW",
-                    user_id=officer_user_id,
-                    application_id=application.id,
-                    details={
-                        "previous_department": dept_name,
-                        "next_department": next_step.department.name,
-                        "step_order": next_step.step_order
-                    }
-                )
-
-                return True, f"Approved by {dept_name}. Application advanced and dispatched to {next_step.department.name}.", {
-                    "overall_status": application.overall_status.value,
-                    "next_department": next_step.department.name
-                }
-        else:
-                # All departments approved.
-                db.commit()
-
-                AuditService.log(
-                    db=db,
-                    action="ALL_DEPARTMENTS_APPROVED",
-                    entity="WORKFLOW",
-                    user_id=officer_user_id,
-                    application_id=application.id,
-                    details={
-                        "message": "All required department clearances completed."
-                    }
-                )
-
-                NotificationService.send(
-                    db=db,
-                    user_id=application.user_id,
-                    application_id=application.id,
-                    title="All Department Clearances Granted",
-                    message=f"Application {application.application_number} has received all required departmental approvals.",
-                    msg_type="SUCCESS"
-                )
-
-                return True, "All departments approved.", {
+                return True, (
+                    f"Approved by {dept_name}, but dispatch to next "
+                    f"department ({next_step.department.name}) failed."
+                ), {
                     "overall_status": application.overall_status.value
                 }
-        return True, f"Department status updated to {decision_status.value}", {"overall_status": application.overall_status.value}
+
+            AuditService.log(
+                db=db,
+                action="WORKFLOW_ADVANCED",
+                entity="WORKFLOW",
+                user_id=officer_user_id,
+                application_id=application.id,
+                details={
+                    "previous_department": dept_name,
+                    "next_department": next_step.department.name,
+                    "step_order": next_step.step_order
+                }
+            )
+
+            return True, (
+                f"Approved by {dept_name}. Application advanced "
+                f"and dispatched to {next_step.department.name}."
+            ), {
+                "overall_status": application.overall_status.value,
+                "next_department": next_step.department.name
+            }
+
+        else:
+            # No next department means this was the final approval
+            application.overall_status = OverallStatus.APPROVED
+            db.commit()
+
+            AuditService.log(
+                db=db,
+                action="ALL_DEPARTMENTS_APPROVED",
+                entity="WORKFLOW",
+                user_id=officer_user_id,
+                application_id=application.id,
+                details={
+                    "message": "All required department clearances completed."
+                }
+            )
+
+            NotificationService.send(
+                db=db,
+                user_id=application.user_id,
+                application_id=application.id,
+                title="All Department Clearances Granted",
+                message=(
+                    f"Application {application.application_number} "
+                    f"has received all required departmental approvals."
+                ),
+                msg_type="SUCCESS"
+            )
+
+            return True, "All departments approved.", {
+                "overall_status": application.overall_status.value
+            }
+           
